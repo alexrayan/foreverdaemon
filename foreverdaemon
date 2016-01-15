@@ -1,0 +1,92 @@
+#!/bin/sh
+# /etc/init.d/foreverdaemon
+# Authors: alexrayan69@gmail.com
+# chkconfig: -80 05
+
+### BEGIN INIT INFO
+# Provides: foreverdaemon
+# Required-Start:       $syslog $remote_fs
+# Required-Stop:        $syslog $remote_fs
+# Should-Start:         $local_fs
+# Should-Stop:          $local_fs
+# Default-Start:        2 3 4 5
+# Default-Stop:         0 1 6
+# Short-Description:    Daemon script for nodejs server 
+# Description:          Deamon script for nodejs server
+#			that keeps it running forever
+### END INIT INFO
+
+# Application name to display in echo text
+# NAME="myapp"
+# Application directory path to start file
+# APP_DIRECTORY=/var/www/html/myapp.com
+# Application start file name
+# APP_START=server.js
+# Process ID file path
+# PIDFILE=/var/run/myapp.pid
+# Log file
+# LOGFILE=/var/log/myapp.log
+
+NAME="myapp"
+NODE_BIN_DIR=/usr/bin
+NODE_PATH=/usr/lib/node_modules/
+APP_DIRECTORY=/var/www/html/myapp.com
+APP_START=server.js
+PIDFILE=/var/run/$NAME.pid
+LOGFILE=/var/log/$NAME.log
+
+PATH=$NODE_BIN_DIR:$PATH
+export NODE_PATH=$NODE_PATH
+
+start(){
+	if [ -f $PIDFILE ]; then
+		echo "Process $NAME already running"
+		RETVAL=0
+	else
+        	echo "Starting $NAME"
+        	$NODE_BIN_DIR/forever --pidFile $PIDFILE --sourceDir $APP_DIRECTORY \
+                	-a -l $LOGFILE --minUptime 5000 --spinSleepTime 2000 start $APP_START 
+		RETVAL=$?
+	fi
+}
+stop(){
+        if [ -f $PIDFILE ]; then
+                echo "Shutting down $NAME"
+		$NODE_BIN_DIR/forever stop $(cat $PIDFILE)
+                rm -f $PIDFILE
+                RETVAL=$?
+        else
+                echo "$NAME is not running"
+                RETVAL=0
+        fi
+}
+restart(){
+	echo "Restart $NAME"
+	stop
+	start
+}
+status(){
+        echo "Status for $NAME:"
+        $NODE_BIN_DIR/forever list
+        RETVAL=$?
+}
+
+case "$1" in
+        start)
+                start
+                ;;
+        stop)
+                stop
+                ;;
+        status)
+                status
+                ;;
+        restart)
+                restart
+                ;;
+        *)
+                echo "Usage: {start|stop|status|restart}"
+                exit 1
+                ;;
+esac
+exit $RETVAL
