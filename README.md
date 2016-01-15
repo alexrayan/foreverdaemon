@@ -20,6 +20,21 @@ APP_START=server.js                         Application start file name
 </code>
 </pre>
 
+Setup executable permissions: 
+<div class="highlight highlight-source-shell"><pre>
+chmod +x /etc/init.d/foreverdaemon
+</pre></div>
+
+Add script to boot on Debian: 
+<div class="highlight highlight-source-shell"><pre>
+update-rc.d foreverdaemon defaults 100
+</pre></div>
+
+Remove script from boot on Debian:
+<div class="highlight highlight-source-shell"><pre>
+update-rc.d foreverdaemon stop levels .
+</pre></div>
+
 ## Usage
 
 To start the service:
